@@ -2,31 +2,29 @@ import React, { useState, useEffect } from 'react';
 import NoteForm from './NoteForm';
 import Note from './Note';
 import Modal from './Modal';
+import api from '../http-commons'; 
 
 const NoteList = () => {
-  const listnotes = [
-    { id: 1, title: 'Primera nota', author: '3r4te5ryui', description: 'dsfdfgsfgfdsgdfdggfdg' },
-    { id: 2, title: 'Segunda nota', author: '3r4te5ryui', description: 'dsfdfgsfgfdsgdfdggfdg' },
-    { id: 3, title: 'Tercera nota', author: '3r4te5ryui', description: 'dsfdfgsfgfdsgdfdggfdg' },
-    { id: 4, title: 'Primera nota', author: '3r4te5ryui', description: 'dsfdfgsfgfdsgdfdggfdgdsfdfgsfgfdsgdfdggfdgdsfdfgsfgfdsgdfdggfdgdsfdfgsfgfdsgdfdggfdg' },
-    { id: 5, title: 'Segunda nota', author: '3r4te5ryui', description: 'dsfdfgsfgfdsgdfdggfdg' },
-    { id: 6, title: 'Tercera nota', author: '3r4te5ryui', description: 'dsfdfgsfgfdsgdfdggfdg' },
-    { id: 7, title: 'Primera nota', author: '3r4te5ryui', description: 'dsfdfgsfgfdsgdfdggfdg' },
-  ]
-
-  const [notes, setNotes] = useState(listnotes);
+  const [notes, setNotes] = useState([]);
   const [selectedNote, setSelectedNote] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const addNote = (note) => {
-    const newNote = {
-      id: notes.length + 1,
-      title: note.title,
-      author: note.author,
-      description: note.description,
-    };
+  const fetchNotes = async () => {
+    try {
+      const response = await api.get('/notes');
+      setNotes(response.data); 
+    } catch (error) {
+      console.error('Error al obtener las notas:', error);
+    }
+  };
 
-    setNotes([...notes, newNote]);
+  const addNote = async (newNote) => {
+    try {
+      await api.post('/notes', newNote);
+      setNotes([...notes, newNote]);
+    } catch (error) {
+      console.error('Error al agregar la nota:', error);
+    }
   };
 
   const openModal = (note) => {
@@ -39,14 +37,20 @@ const NoteList = () => {
     setIsModalOpen(false);
   };
 
-  const deleteNote = () => {
-    const updatedNotes = notes.filter((note) => note.id !== selectedNote.id);
-    setNotes(updatedNotes);
-    closeModal();
+  const deleteNote = async () => {
+    try {
+      console.log(selectedNote)
+      await api.delete(`/notes/${selectedNote._id}`);
+      const updatedNotes = notes.filter((note) => note._id !== selectedNote._id);
+      setNotes(updatedNotes);
+      closeModal();
+    } catch (error) {
+      console.error('Error al eliminar la nota:', error);
+    }
   };
 
   useEffect(() => {
-    setNotes(listnotes);
+    fetchNotes();
   }, []);
   
   return (

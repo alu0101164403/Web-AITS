@@ -8,12 +8,10 @@ const NoteForm = ({ onAddNote }) => {
   const handleAddNote = () => {
     if (noteText.trim() !== '') {
       const newNote = {
-        id: Date.now(),
         title: noteTitle,
         author: noteAuthor,
         description: noteText,
       };
-
       onAddNote(newNote);
       setNoteTitle('');
       setNoteAuthor('');
